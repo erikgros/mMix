@@ -20,6 +20,9 @@ function [h dhdr dydt2] = zr(R, z0, t)
 %   dydt2 = - y(1) .* (1 + y(2).^2)^(3/2); % (2d)
    y(1) += dt * dydt1;
    y(2) += dt * dydt2;
+   if abs(dydt2) < 1e-1 % plotting inflection points
+    plot(t(i), h(i),'bko'); hold on
+   end
   end
   h(i+1) = y(1);
   dhdr(i+1) = y(2);
@@ -32,13 +35,15 @@ col = ['r','b','g','y'];
 R = 1.15 * sqrt(0.842); % tip radius
 for k = 1:4
  z0 = 2 / R;
-% r = linspace (0, R, N); % radius
-% [z dzdr d2zdr2I] = zr(R, z0, r);
+ r = linspace (0, 2*R, 2*N); % radius
+ [z dzdr d2zdr2I] = zr(R, z0, r);
 % plot( r(1:10:end), z(1:10:end), [col(k) "+"] );hold on;
 % using xzt formulation (requires max(s) = pi*R):
  s = linspace (0, pi*R, N); % arc length
  a = lsode( "dxztds", [0 z0 0], s);
  plot( a(1:1:end,1), a(1:1:end,2), [col(k) "-"] );hold on;
+ tubeR = R* ones(1,N); % tube radius
+ plot( tubeR, a(:,2), [col(k) "-"] );
  R *= 1/1.15;
 end
 xlabel('r'); ylabel('z')
